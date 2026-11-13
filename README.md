@@ -1,5 +1,7 @@
 # Mission Control: Go/No-Go Launch Console
 
+[![CI](https://github.com/nikita-ravi-coforge/Mission-Control-Console/actions/workflows/ci.yml/badge.svg)](https://github.com/nikita-ravi-coforge/Mission-Control-Console/actions/workflows/ci.yml)
+
 Engineers at the consoles file free-text anomaly reports. A pipeline sorts each
 one, checks its readings against the launch limits, and drafts a short briefing.
 The Flight Director reads the briefing and approves it.
@@ -119,6 +121,9 @@ TOOL_CHOICES.md                                 why each tool was chosen
 | Draft, review, and approval | `app/pipeline/briefing.py`, `app/api.py`, `app/db.py` | `test_briefing_loop.py`, `test_approval.py` |
 | Trace and cost | `app/static/app.js`, `app/cost.py`, `app/pipeline/trace.py` | `test_cost.py`, `test_pipeline_e2e.py` |
 | Tests with no network or key | `app/llm/base.py`, `app/llm/fake.py`, `tests/conftest.py` | the whole suite; `test_anthropic_client.py` tests the real client against a stub |
+
+Test run output: the CI badge at the top links to the GitHub Actions runs, where each
+run shows the full `uv run pytest -v` output on a machine with no API key.
 
 ## Development workflow
 
