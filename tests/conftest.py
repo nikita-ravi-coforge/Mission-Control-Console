@@ -22,8 +22,17 @@ def report_payload(**overrides) -> dict:
 
 @pytest.fixture(autouse=True)
 def _no_real_model(monkeypatch):
-    """Force fake mode even if the developer's shell or .env configures a real provider."""
+    """Force fake mode even if the developer's shell or .env configures a real provider.
+
+    Building the real Anthropic client raises, so an accidental real call fails loudly.
+    """
     monkeypatch.setenv("LLM_PROVIDER", "fake")
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+
+    def _refuse(*args, **kwargs):
+        raise AssertionError("Tests must not build a real Anthropic client")
+
+    monkeypatch.setattr("anthropic.AsyncAnthropic", _refuse)
 
 
 @pytest.fixture

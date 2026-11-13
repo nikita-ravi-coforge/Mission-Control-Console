@@ -1,7 +1,7 @@
 def test_health_reports_ok_and_the_model_mode(client):
     response = client.get("/api/health")
     assert response.status_code == 200
-    assert response.json() == {"ok": True, "llm_mode": "fake"}
+    assert response.json() == {"ok": True, "llm_mode": "fake", "models": None}
 
 
 def test_index_page_is_served(client):

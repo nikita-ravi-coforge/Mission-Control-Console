@@ -58,28 +58,38 @@ updated after filing (`app/db.py`). SQLite allows one writer at a time, which is
 for one room filing a few reports a minute but not for several sites. All SQL sits
 behind one `Database` class, so moving to PostgreSQL changes one file.
 
-## Model: two tiers behind one interface
+## Model: Claude Haiku 5.5 for triage, Claude Sonnet 5.5 for the briefing
 
-**Reason.** The pipeline makes two different kinds of call. Sorting and the three
-checks are short classification questions with a small JSON answer, asked four times
-per report, so they go to a fast, cheap model. Drafting and reviewing the briefing
-need better writing and judgement and are what the Flight Director actually reads, so
-they go to a stronger model. Each call names its tier (`fast` or `strong`) and the
-client maps the tier to a model, so the split is one line per call and the cost of
-each tier is visible on the trace cards.
+**Reason.** The pipeline makes two different kinds of call, so it uses two models
+behind one interface (`app/llm/base.py`).
 
-**Rejected: one strong model for every call.** It is simpler, but it pays the strong
-model's price and latency for four yes/no-style questions per report, in a window
-where the brief-by time can be five minutes.
+- **Fast tier, `claude-haiku-5-5`.** Sorting and the three checks are short
+  classification questions with a small JSON answer, asked four times per report,
+  three of them at once. Haiku is the fastest and cheapest Claude model ($0.10 in /
+  $0.50 out per million tokens), which matters when the brief-by time can be five
+  minutes.
+- **Strong tier, `claude-sonnet-5-5`.** Drafting and reviewing the briefing need
+  better writing and judgement, and the briefing is what the Flight Director
+  actually reads. Sonnet costs more ($2 in / $10 out per million tokens) but is
+  called at most six times per report.
+
+Both models support structured outputs, so sorting and the checks are requested
+with a JSON schema and the reply is still validated in code. Each call names its
+tier, and the tier-to-model mapping is two settings (`MODEL_FAST`,
+`MODEL_STRONG`), so a customer can move the strong tier to `claude-opus-5-5` or
+`claude-fable-5-2` without a code change.
+
+**Rejected: one top-tier model (Claude Fable 5.2) for every call.** It is the most
+capable model, but at $8 in / $40 out per million tokens it would price four
+yes/no-style questions per report at 80 times Haiku's rate, and its longer thinking
+time works against a five-minute brief-by window. Nothing in triage needs that
+capability, because the decision that matters, the verdict, is made by code.
 
 **Customer concern: "Our anomaly notes are sensitive. Where do they go, and what does
-each report cost?"** Notes are sent only to the configured model endpoint, and every
-model call goes through one interface (`app/llm/base.py`), so the provider can be
-swapped for one inside the customer's own cloud tenant without touching the pipeline.
-The cost of every report is calculated in code from token counts and shown in the
-console, and an unpriced model raises an error instead of being counted as free
-(`app/cost.py`).
-
-> The real model client is the one piece not yet in the repo: the app currently runs
-> on the scripted fake model. This section will name the two deployed models and
-> their prices once the provider deployment is confirmed.
+each report cost?"** Notes are sent only to the Anthropic API, using the customer's
+own key from the environment, never from code. Because every model call goes through
+one interface, the client can be swapped for Claude inside the customer's own cloud
+tenant (Amazon Bedrock, Google Cloud, or Microsoft Foundry) without touching the
+pipeline. The cost of every report is calculated in code from the token counts the
+API returns and shown in the console per step and per report, and the app refuses to
+start with a model that has no price (`app/config.py`, `app/cost.py`).
