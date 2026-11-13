@@ -23,6 +23,8 @@ dev = [
 pythonpath = ["."]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+filterwarnings = ["ignore:Using `httpx` with `starlette.testclient`"]
 # Tests must pass with no network: any real socket use fails the test.
 addopts = "--disable-socket --allow-unix-socket"
 
