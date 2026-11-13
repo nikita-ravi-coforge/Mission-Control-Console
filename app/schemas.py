@@ -52,3 +52,27 @@ class Review(BaseModel):
 
     approved: StrictBool
     feedback: str = ""
+
+
+# Sanity ranges for the form are deliberately wider than the launch limits:
+# an out-of-limit reading (fuel 100.1) must be accepted and then judged no_go.
+class ReportIn(BaseModel):
+    """A report as filed by an engineer."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    engineer_name: str = Field(min_length=1, max_length=80)
+    station: str = Field(min_length=1, max_length=40)
+    wind_knots: float = Field(strict=True, ge=0, le=300, allow_inf_nan=False)
+    temp_c: float = Field(strict=True, ge=-100, le=100, allow_inf_nan=False)
+    fuel_pct: float = Field(strict=True, ge=0, le=150, allow_inf_nan=False)
+    note: str = Field(min_length=1, max_length=2000)
+
+    def readings(self) -> Readings:
+        return Readings(wind_knots=self.wind_knots, temp_c=self.temp_c, fuel_pct=self.fuel_pct)
+
+
+class ApproveIn(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    approver_name: str = Field(min_length=1, max_length=80)
