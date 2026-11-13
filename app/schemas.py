@@ -45,3 +45,10 @@ class CheckResult(BaseModel):
 
     flagged: StrictBool
     reason: str = ""
+
+
+class Review(BaseModel):
+    """The evaluator's reply on a draft briefing."""
+
+    approved: StrictBool
+    feedback: str = ""
