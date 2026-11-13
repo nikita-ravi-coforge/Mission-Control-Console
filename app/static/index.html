@@ -4,9 +4,78 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Mission Control</title>
+    <link rel="stylesheet" href="/static/styles.css" />
   </head>
   <body>
-    <h1>Mission Control</h1>
-    <p>Go/No-Go launch console. The console UI is under construction.</p>
+    <div id="fake-banner" class="fake-banner" hidden>
+      FAKE MODEL MODE — replies are scripted, no real model is being called
+    </div>
+
+    <header class="topbar">
+      <h1>Mission Control</h1>
+      <span class="subtitle">Go/No-Go Launch Console · Meridian Launch Services</span>
+    </header>
+
+    <main class="layout">
+      <section class="panel" aria-labelledby="form-title">
+        <h2 id="form-title">File a report</h2>
+        <form id="report-form" novalidate>
+          <label>
+            Engineer name
+            <input name="engineer_name" type="text" maxlength="80" autocomplete="name" />
+            <span class="field-error" data-error-for="engineer_name"></span>
+          </label>
+          <label>
+            Station
+            <input name="station" type="text" maxlength="40" placeholder="e.g. PROP-2" />
+            <span class="field-error" data-error-for="station"></span>
+          </label>
+          <div class="readings">
+            <label>
+              Wind (knots)
+              <input name="wind_knots" type="number" step="any" inputmode="decimal" />
+              <span class="hint">limit: 25 or less</span>
+              <span class="field-error" data-error-for="wind_knots"></span>
+            </label>
+            <label>
+              Temp (°C)
+              <input name="temp_c" type="number" step="any" inputmode="decimal" />
+              <span class="hint">limit: 4 or more</span>
+              <span class="field-error" data-error-for="temp_c"></span>
+            </label>
+            <label>
+              Fuel (%)
+              <input name="fuel_pct" type="number" step="any" inputmode="decimal" />
+              <span class="hint">limit: 98 to 100</span>
+              <span class="field-error" data-error-for="fuel_pct"></span>
+            </label>
+          </div>
+          <label>
+            Note
+            <textarea name="note" rows="5" maxlength="2000"
+              placeholder="What happened, to which component, and when"></textarea>
+            <span class="field-error" data-error-for="note"></span>
+          </label>
+          <span class="field-error" data-error-for="body"></span>
+          <button type="submit" id="submit-button">File report</button>
+          <p id="form-status" class="form-status" role="status"></p>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="list-title">
+        <h2 id="list-title">Reports</h2>
+        <ul id="report-list" class="report-list"></ul>
+        <p id="list-empty" class="muted">No reports filed yet.</p>
+      </section>
+
+      <section class="panel detail" aria-labelledby="detail-title">
+        <h2 id="detail-title">Briefing</h2>
+        <div id="detail">
+          <p class="muted">Select a report to see its briefing, verdict, cost, and trace.</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
   </body>
 </html>
