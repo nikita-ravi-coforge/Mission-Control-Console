@@ -58,6 +58,12 @@ updated after filing (`app/db.py`). SQLite allows one writer at a time, which is
 for one room filing a few reports a minute but not for several sites. All SQL sits
 behind one `Database` class, so moving to PostgreSQL changes one file.
 
+One limit to be open about: approval records the name the approver types, and the
+console has no login. "Only a person can approve" is guaranteed in the sense that no
+pipeline or model code path can approve, not in the sense that the person is
+authenticated. A real deployment would put the console behind the customer's single
+sign-on and record the signed-in identity instead of a typed name.
+
 ## Model: Claude Haiku 5.5 for triage, Claude Sonnet 5.5 for the briefing
 
 **Reason.** The pipeline makes two different kinds of call, so it uses two models
