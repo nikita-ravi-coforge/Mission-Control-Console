@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StrictBool
 
 Severity = Literal["low", "medium", "high"]
 Verdict = Literal["go", "no_go"]
@@ -31,3 +31,17 @@ class Violation(BaseModel):
 class LimitResult(BaseModel):
     verdict: Verdict
     violations: list[Violation] = Field(default_factory=list)
+
+
+class Classification(BaseModel):
+    """The model's sorting reply. Any other value fails validation."""
+
+    subsystem: Subsystem
+    severity: Severity
+
+
+class CheckResult(BaseModel):
+    """One screening check's reply: was it flagged, and why."""
+
+    flagged: StrictBool
+    reason: str = ""
