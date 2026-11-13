@@ -23,9 +23,24 @@ uv run python -m app
 
 Then open http://localhost:8000.
 
-With no `.env` file the app starts in **FAKE MODEL MODE** (yellow banner): model
-replies are scripted, so everything works with no API key. Reports are saved in
+With no API key the app starts in **FAKE MODEL MODE** (yellow banner): model
+replies are scripted, so everything works with no key. Reports are saved in
 `data/mission_control.db` and are still there after a restart.
+
+### Using real Claude models
+
+Copy `.env.example` to `.env` and set `ANTHROPIC_API_KEY`. The same start command
+then uses Claude, with two models behind one interface:
+
+| Tier | Used for | Default model | Setting |
+|---|---|---|---|
+| fast | sorting, the three checks | `claude-haiku-5-5` | `MODEL_FAST` |
+| strong | drafting and reviewing the briefing | `claude-sonnet-5-5` | `MODEL_STRONG` |
+
+Any model priced in `app/pricing.py` can be used for either tier, for example
+`MODEL_STRONG=claude-fable-5-2`. The app refuses to start with a model that has no
+price, so a report's cost is never silently wrong. `.env` is git-ignored; never
+commit a key.
 
 ## Run the tests
 
@@ -80,6 +95,7 @@ app/
   limits.py, brief_by.py, cost.py, pricing.py   plain-code rules (no model, no I/O)
   schemas.py                                    input and model-reply shapes
   llm/base.py, llm/fake.py                      the one model interface, and its fake
+  llm/anthropic_client.py                       the real client (Claude)
   prompts.py                                    every prompt in one place
   pipeline/                                     classify, checks, briefing loop, runner, trace
   db.py                                         SQLite storage
@@ -102,7 +118,7 @@ TOOL_CHOICES.md                                 why each tool was chosen
 | Three checks and hidden instructions | `app/pipeline/checks.py` | `test_checks.py`, `test_hidden_instruction.py` |
 | Draft, review, and approval | `app/pipeline/briefing.py`, `app/api.py`, `app/db.py` | `test_briefing_loop.py`, `test_approval.py` |
 | Trace and cost | `app/static/app.js`, `app/cost.py`, `app/pipeline/trace.py` | `test_cost.py`, `test_pipeline_e2e.py` |
-| Tests with no network or key | `app/llm/base.py`, `app/llm/fake.py`, `tests/conftest.py` | the whole suite |
+| Tests with no network or key | `app/llm/base.py`, `app/llm/fake.py`, `tests/conftest.py` | the whole suite; `test_anthropic_client.py` tests the real client against a stub |
 
 ## Development workflow
 

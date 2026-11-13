@@ -29,7 +29,7 @@ def create_router(db: Database, llm: LLMClient) -> APIRouter:
 
     @router.get("/health")
     def health() -> dict:
-        return {"ok": True, "llm_mode": llm.mode}
+        return {"ok": True, "llm_mode": llm.mode, "models": getattr(llm, "models", None)}
 
     @router.post("/reports", status_code=201)
     def create_report(report: ReportIn, background: BackgroundTasks) -> dict:
